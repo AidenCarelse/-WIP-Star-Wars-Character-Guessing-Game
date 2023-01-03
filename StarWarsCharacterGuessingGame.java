@@ -1,14 +1,9 @@
 // TEMP
-import com.gluonhq.charm.glisten.control.AutoCompleteTextField;
 import javafx.application.Application;
-import javafx.application.HostServices;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Hyperlink;
@@ -16,26 +11,27 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-
 import java.io.*;
-import java.net.URL;
 import java.util.*;
 
 /* TODO (TEMP)
-    - auto complete field
-    - fix images, find better method?
+    - Can't submit when empty field
+    - Auto complete field
+    - Fix images, find better method?
     - Add success/failure animations or sounds
     - Leaderboards and scores tracking?
+    - Create executable?
     - Add comments and clean files (TEMPS)
     - Add more characters
     - update github read me
@@ -54,10 +50,10 @@ public class StarWarsCharacterGuessingGame extends Application
     private TextFlow endText;
     private Rectangle frame;
     private ImageView imageView;
-    private Label imageLabel;
-    private Label characterName;
+    private Label imageLabel, characterName, invalidGuess = null;
     private Pane layout;
     private Stage stage;
+    private static String[] possibleCharacters = null;
 
     // TEMP
     public static void main(String[] args) throws IOException
@@ -78,6 +74,7 @@ public class StarWarsCharacterGuessingGame extends Application
         setView();
 
         Scene scene = new Scene(layout, 900, 900);
+        stage.getIcons().add(new Image(new FileInputStream("data/star_wars_square.jpeg")));
         stage.setScene(scene);
         stage.show();
     }
@@ -146,13 +143,14 @@ public class StarWarsCharacterGuessingGame extends Application
             @Override
             public void handle(MouseEvent t)
             {
+                infoStage.setX(stage.getX() + 350);
+                infoStage.setY(stage.getY() + 80);
                 infoStage.show();
             }
         });
 
         hover.setOnMouseExited(new EventHandler<MouseEvent>()
         {
-
             @Override
             public void handle(MouseEvent t)
             {
@@ -304,37 +302,69 @@ public class StarWarsCharacterGuessingGame extends Application
             }
         });
 
+        field.setOnKeyPressed(new EventHandler<KeyEvent>()
+        {
+            @Override
+            public void handle(KeyEvent ke)
+            {
+                if (ke.getCode().equals(KeyCode.ENTER))
+                {
+                    MakeGuess();
+                }
+            }
+        });
+
         layout.getChildren().add(submit);
     }
 
     // TEMP
     private void MakeGuess()
     {
-        String guess = field.getText();
+        String guess = field.getText().toLowerCase();
 
-        if(guess.equals(data[0]))
+        if(invalidGuess != null && layout.getChildren().contains(invalidGuess))
         {
-            setGuessFrame(turn - 1, true);
-            endGame(true);
+            layout.getChildren().remove(invalidGuess);
+        }
 
-            while(turn < 5)
+        if(Arrays.asList(possibleCharacters).contains(guess))
+        {
+            if(guess.equals(data[0].toLowerCase()))
             {
-                updateCharacterInformation();
+                setGuessFrame(turn - 1, true);
+                endGame(true);
+
+                while(turn < 5)
+                {
+                    updateCharacterInformation();
+                }
+            }
+            else
+            {
+                setGuessFrame(turn - 1, false);
+
+                if(turn < 5)
+                {
+                    updateCharacterInformation();
+                }
+                else
+                {
+                    endGame(false);
+                }
+
             }
         }
         else
         {
-            setGuessFrame(turn - 1, false);
+            invalidGuess = new Label("That character doesn't exist in this game!");
+            invalidGuess.setStyle("-fx-font: 18 arial;");
+            invalidGuess.setAlignment(Pos.CENTER);
+            invalidGuess.setLayoutY(780);
+            invalidGuess.setPrefWidth(800);
+            invalidGuess.setLayoutX(50);
+            invalidGuess.setTextFill(Color.RED);
 
-            if(turn < 5)
-            {
-                updateCharacterInformation();
-            }
-            else
-            {
-                endGame(false);
-            }
-
+            layout.getChildren().add(invalidGuess);
         }
 
         field.setText("");
@@ -353,8 +383,16 @@ public class StarWarsCharacterGuessingGame extends Application
         guess.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
         guess.setTextFill(Color.WHITE);
 
+        Label status = new Label(correct ? "✓" : "✗");
+        status.setLayoutX(805);
+        status.setLayoutY(current.getY());
+        status.setPrefHeight(current.getHeight());
+        status.setStyle("-fx-font-size: 28px; -fx-font-weight: bold;");
+        status.setTextFill(Color.WHITE);
+
         guesses.add(guess);
-        layout.getChildren().add(guess);
+        guesses.add(status);
+        layout.getChildren().addAll(guess, status);
 
         if(correct)
         {
@@ -490,23 +528,37 @@ public class StarWarsCharacterGuessingGame extends Application
         String path = "data/sw_character_data.csv";
         BufferedReader br = new BufferedReader(new FileReader(path));
 
-        int num = getRandomInt((int)br.lines().count());
-        br = new BufferedReader(new FileReader(path));
+        int num = getRandomInt((int)new BufferedReader(new FileReader(path)).lines().count());
+        boolean setList = possibleCharacters == null;
 
+        if(setList)
+        {
+            possibleCharacters = new String[(int)new BufferedReader(new FileReader(path)).lines().count()];
+        }
+
+        String[] character = null;
         int index = 0;
         String line = "";
 
         while((line = br.readLine()) != null)
         {
+            String[] curr =  line.split(",");
+            possibleCharacters[index] = curr[0].toLowerCase();
+
             if(index == num)
             {
-                return line.split(",");
+                character = curr;
+
+                if(!setList)
+                {
+                    break;
+                }
             }
 
             index++;
         }
 
-        return null;
+        return character;
     }
 
     // TEMP
