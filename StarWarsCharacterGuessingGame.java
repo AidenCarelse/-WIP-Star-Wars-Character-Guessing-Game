@@ -26,7 +26,6 @@ import java.io.*;
 import java.util.*;
 
 /* TODO (TEMP)
-    - Can't submit when empty field
     - Auto complete field
     - Fix images, find better method?
     - Add success/failure animations or sounds
@@ -283,6 +282,7 @@ public class StarWarsCharacterGuessingGame extends Application
         submit.setLayoutY(715);
         submit.setStyle("-fx-font-size: 24px; -fx-font-weight: bold; -fx-background-color: #119e16;");
         submit.setTextFill(Color.WHITE);
+        submit.setDisable(true);
 
         guesses = new ArrayList<>();
 
@@ -311,6 +311,18 @@ public class StarWarsCharacterGuessingGame extends Application
                 {
                     MakeGuess();
                 }
+            }
+        });
+
+        field.textProperty().addListener((observable, oldValue, newValue) ->
+        {
+            if(field.getText().replaceAll("\\s+","").equals(""))
+            {
+                submit.setDisable(true);
+            }
+            else
+            {
+                submit.setDisable(false);
             }
         });
 
