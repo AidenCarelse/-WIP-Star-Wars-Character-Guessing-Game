@@ -1,5 +1,9 @@
 // TEMP
+import impl.org.controlsfx.autocompletion.SuggestionProvider;
+import impl.org.controlsfx.skin.AutoCompletePopup;
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -22,11 +26,13 @@ import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.controlsfx.control.textfield.AutoCompletionBinding;
+import org.controlsfx.control.textfield.TextFields;
+
 import java.io.*;
 import java.util.*;
 
 /* TODO (TEMP)
-    - Auto complete field
     - Fix images, find better method?
     - Add success/failure animations or sounds
     - Leaderboards and scores tracking?
@@ -52,7 +58,7 @@ public class StarWarsCharacterGuessingGame extends Application
     private Label imageLabel, characterName, invalidGuess = null;
     private Pane layout;
     private Stage stage;
-    private static String[] possibleCharacters = null;
+    private static String[] possibleCharacters = null, formattedCharacterNames = null;
 
     // TEMP
     public static void main(String[] args) throws IOException
@@ -70,12 +76,13 @@ public class StarWarsCharacterGuessingGame extends Application
 
         layout = new Pane();
         layout.setStyle("-fx-background-color: #FFFFFF");
-        setView();
 
         Scene scene = new Scene(layout, 900, 900);
         stage.getIcons().add(new Image(new FileInputStream("data/star_wars_square.jpeg")));
         stage.setScene(scene);
         stage.show();
+
+        setView();
     }
 
     // TEMP
@@ -170,14 +177,14 @@ public class StarWarsCharacterGuessingGame extends Application
 
         String infoString =
                 "Instructions and Information:" +
-                "\n\n" +
-                "Welcome to the Star Wars Character Guessing Game! Inspired by Wordle and its many spinoffs, the goal of the game is to guess the randomly chosen Star Wars character in the lowest amount of guesses possible! The current game has a total of 3 possible characters.\n" +
-                "\n" +
-                "At first, all you are given is the character's species, but with every incorrect answer, more information is given. Gender for biological characters or Droid Type for droids (ex: astromech, protocol), Birth Year given in BBY (Before the Battle of Yavin) and ABY (After the Battle of Yavin), Homeworld (wherever the character was born, not where they grew up) and finally their First on Screen Apperance.\n" +
-                "\n" +
-                "Once you have succesfully guessed the chosen character, or you have run out of guesses, all the information as well as the character's name will be given along with an image and link to their wiki page. You can then press the 'PLAY AGAIN' button to restart the game with another randomly chosen character. Overall, it's pretty simple!\n" +
-                "\n\n" +
-                "Created by Aiden Carelse (January 2023)";
+                        "\n\n" +
+                        "Welcome to the Star Wars Character Guessing Game! Inspired by Wordle and its many spinoffs, the goal of the game is to guess the randomly chosen Star Wars character in the lowest amount of guesses possible! The current game has a total of 3 possible characters.\n" +
+                        "\n" +
+                        "At first, all you are given is the character's species, but with every incorrect answer, more information is given. Gender for biological characters or Droid Type for droids (ex: astromech, protocol), Birth Year given in BBY (Before the Battle of Yavin) and ABY (After the Battle of Yavin), Homeworld (wherever the character was born, not where they grew up) and finally their First on Screen Apperance.\n" +
+                        "\n" +
+                        "Once you have succesfully guessed the chosen character, or you have run out of guesses, all the information as well as the character's name will be given along with an image and link to their wiki page. You can then press the 'PLAY AGAIN' button to restart the game with another randomly chosen character. Overall, it's pretty simple!\n" +
+                        "\n\n" +
+                        "Created by Aiden Carelse (January 2023)";
 
         Label infoLabel = new Label(infoString);
         infoLabel.setStyle("-fx-font: 16 arial;");
@@ -269,6 +276,10 @@ public class StarWarsCharacterGuessingGame extends Application
         field.setStyle("-fx-font-size: 20px;");
         field.setPromptText("Guess Character");
 
+        layout.getStylesheets().add("new_style.css");
+        AutoCompletionBinding<String> binding = TextFields.bindAutoCompletion(field, formattedCharacterNames);
+        binding.setPrefWidth(field.getPrefWidth()/3);
+
         layout.getChildren().add(field);
     }
 
@@ -316,7 +327,7 @@ public class StarWarsCharacterGuessingGame extends Application
 
         field.textProperty().addListener((observable, oldValue, newValue) ->
         {
-            if(field.getText().replaceAll("\\s+","").equals(""))
+            if(field.getText().replaceAll("\\s+","").equals("") && !submit.getText().equals("PLAY AGAIN"))
             {
                 submit.setDisable(true);
             }
@@ -423,8 +434,8 @@ public class StarWarsCharacterGuessingGame extends Application
 
         try
         {
-             image = new Image(data[7]);
-             imageLabel = null;
+            image = new Image(data[7]);
+            imageLabel = null;
         }
         catch (Exception e)
         {
@@ -433,7 +444,7 @@ public class StarWarsCharacterGuessingGame extends Application
                 image = new Image(new FileInputStream("data/blank_pfp.png"));
             }
             catch (Exception ignored) { }
-            
+
             imageLabel = new Label(data[0]);
             imageLabel.setStyle("-fx-font: 24 arial; -fx-font-weight: bold;");
             imageLabel.setAlignment(Pos.CENTER);
@@ -545,7 +556,8 @@ public class StarWarsCharacterGuessingGame extends Application
 
         if(setList)
         {
-            possibleCharacters = new String[(int)new BufferedReader(new FileReader(path)).lines().count()];
+            possibleCharacters = new String[(int)new BufferedReader(new FileReader(path)).lines().count() - 1];
+            formattedCharacterNames = new String[(int)new BufferedReader(new FileReader(path)).lines().count() - 1];
         }
 
         String[] character = null;
@@ -555,7 +567,13 @@ public class StarWarsCharacterGuessingGame extends Application
         while((line = br.readLine()) != null)
         {
             String[] curr =  line.split(",");
-            possibleCharacters[index] = curr[0].toLowerCase();
+
+            if(index != 0)
+            {
+                possibleCharacters[index - 1] = curr[0].toLowerCase();
+                formattedCharacterNames[index - 1] = curr[0];
+            }
+
 
             if(index == num)
             {
@@ -584,16 +602,16 @@ public class StarWarsCharacterGuessingGame extends Application
     private String getDataLabel(int a)
     {
         return switch (a)
-        {
-            case 0 -> "Name";
-            case 1 -> "Species";
-            case 2 -> "Gender/Droid Type";
-            case 3 -> "Birth Year";
-            case 4 -> "Homeworld";
-            case 5 -> "First Screen Appearance";
-            case 6 -> "Wiki Link";
-            case 7 -> "Image Link";
-            default -> null;
-        };
+                {
+                    case 0 -> "Name";
+                    case 1 -> "Species";
+                    case 2 -> "Gender/Droid Type";
+                    case 3 -> "Birth Year";
+                    case 4 -> "Homeworld";
+                    case 5 -> "First Screen Appearance";
+                    case 6 -> "Wiki Link";
+                    case 7 -> "Image Link";
+                    default -> null;
+                };
     }
 }
