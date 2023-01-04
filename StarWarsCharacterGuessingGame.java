@@ -18,6 +18,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -33,7 +34,7 @@ import java.io.*;
 import java.util.*;
 
 /* TODO (TEMP)
-    - Fix Maul image and Grogu information
+    - Fix Grogu information
     - Sort auto comepletion list alphabetically
     - Scale data label if too large (check Maul)
     - Add additional instructions information for droids
@@ -86,7 +87,10 @@ public class StarWarsCharacterGuessingGame extends Application
         layout = new Pane();
         layout.setStyle("-fx-background-color: #FFFFFF");
 
-        Scene scene = new Scene(layout, 900, 825);
+        double w = 900;
+        double h = 825;
+
+        Scene scene = new Scene(layout, w, h);
         stage.getIcons().add(new Image(new FileInputStream("data/star_wars_square.jpeg")));
         stage.setScene(scene);
         stage.show();
