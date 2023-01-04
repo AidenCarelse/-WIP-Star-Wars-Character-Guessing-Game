@@ -5,6 +5,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -31,19 +32,29 @@ import javafx.util.Duration;
 import org.controlsfx.control.textfield.AutoCompletionBinding;
 import org.controlsfx.control.textfield.TextFields;
 
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import java.awt.image.BufferedImage;
 import java.io.*;
+import java.net.URL;
 import java.util.*;
 
-import static java.lang.Thread.sleep;
-
 /* TODO (TEMP)
-    - Fix images, find better method?
-    - Add success/failure animations or sounds
-    - Leaderboards and scores tracking?
+    - Fix Maul image and Grogu information
+    - Scale data label if too large (check Maul)
+    - Add additional instructions information for droids
+    - Add animation for new information
     - Create executable?
     - Add comments and clean files (TEMPS)
     - Add more characters
     - update github read me
+ */
+
+/* TODO (For future versions)
+    - MORE CHARACTERS!
+    - Scores tracking
+    - Sounds
+    - Import to website
  */
 
 public class StarWarsCharacterGuessingGame extends Application
@@ -491,11 +502,13 @@ public class StarWarsCharacterGuessingGame extends Application
 
         try
         {
-            image = new Image(data[7]);
+            image = new Image(data[7].replaceAll("\"", ""));
             imageLabel = null;
         }
         catch (Exception e)
         {
+            System.out.println("["+data[7]+"]\n"+e);
+
             try
             {
                 image = new Image(new FileInputStream("data/blank_pfp.png"));
