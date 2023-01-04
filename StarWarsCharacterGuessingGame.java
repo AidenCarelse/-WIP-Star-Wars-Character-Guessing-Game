@@ -1,7 +1,8 @@
 // TEMP
-import impl.org.controlsfx.autocompletion.SuggestionProvider;
-import impl.org.controlsfx.skin.AutoCompletePopup;
+import javafx.animation.Animation;
+import javafx.animation.FadeTransition;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -26,11 +27,14 @@ import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Duration;
 import org.controlsfx.control.textfield.AutoCompletionBinding;
 import org.controlsfx.control.textfield.TextFields;
 
 import java.io.*;
 import java.util.*;
+
+import static java.lang.Thread.sleep;
 
 /* TODO (TEMP)
     - Fix images, find better method?
@@ -77,7 +81,7 @@ public class StarWarsCharacterGuessingGame extends Application
         layout = new Pane();
         layout.setStyle("-fx-background-color: #FFFFFF");
 
-        Scene scene = new Scene(layout, 900, 900);
+        Scene scene = new Scene(layout, 900, 825);
         stage.getIcons().add(new Image(new FileInputStream("data/star_wars_square.jpeg")));
         stage.setScene(scene);
         stage.show();
@@ -361,6 +365,8 @@ public class StarWarsCharacterGuessingGame extends Application
                 {
                     updateCharacterInformation();
                 }
+
+                showSuccess();
             }
             else
             {
@@ -391,6 +397,57 @@ public class StarWarsCharacterGuessingGame extends Application
         }
 
         field.setText("");
+    }
+
+    // TEMP
+    private void showSuccess()
+    {
+        String path = "data/confetti.gif";
+
+        Image image = new Image((new File(path).toURI().toString()));
+
+        ImageView leftConfetti = new ImageView(image);
+        leftConfetti.setX(-100);
+
+        ImageView rightConfetti = new ImageView(image);
+        rightConfetti.setX(750);
+
+        layout.getChildren().addAll(leftConfetti, rightConfetti);
+
+        FadeTransition ft = new FadeTransition(Duration.millis(1000), leftConfetti);
+        ft.setFromValue(1.0);
+        ft.setToValue(0.0);
+
+        FadeTransition ft2 = new FadeTransition(Duration.millis(1000), rightConfetti);
+        ft2.setFromValue(1.0);
+        ft2.setToValue(0.0);
+
+        ft.play();
+        ft2.play();
+
+        ft.statusProperty().addListener(new ChangeListener<Animation.Status>()
+        {
+            @Override
+            public void changed(ObservableValue<? extends Animation.Status> observableValue, Animation.Status oldValue, Animation.Status newValue)
+            {
+                if(newValue == Animation.Status.STOPPED)
+                {
+                    layout.getChildren().remove(leftConfetti);
+                }
+            }
+        });
+
+        ft2.statusProperty().addListener(new ChangeListener<Animation.Status>()
+        {
+            @Override
+            public void changed(ObservableValue<? extends Animation.Status> observableValue, Animation.Status oldValue, Animation.Status newValue)
+            {
+                if(newValue == Animation.Status.STOPPED)
+                {
+                    layout.getChildren().remove(rightConfetti);
+                }
+            }
+        });
     }
 
     // TEMP
