@@ -6,6 +6,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -22,6 +23,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
@@ -34,8 +36,6 @@ import java.io.*;
 import java.util.*;
 
 /* TODO (TEMP)
-    - Fix Grogu information
-    - Sort auto comepletion list alphabetically
     - Scale data label if too large (check Maul)
     - Add additional instructions information for droids
     - Add animation for new information
@@ -49,6 +49,7 @@ import java.util.*;
     - MORE CHARACTERS!
     - Scores tracking
     - Sounds
+    - Resizeable stage (and nodes)
     - Import to website
  */
 
@@ -251,6 +252,7 @@ public class StarWarsCharacterGuessingGame extends Application
             Label information = new Label("???");
             information.setStyle("-fx-font: 18 arial;");
             information.setPrefHeight(label.getHeight());
+            information.setPrefWidth(250);
             information.setAlignment(Pos.CENTER_LEFT);
             information.setLayoutY(label.getLayoutY());
             information.setLayoutX(590);
@@ -610,6 +612,21 @@ public class StarWarsCharacterGuessingGame extends Application
     private void updateCharacterInformation()
     {
         dataLabels[turn].setText(data[turn+1]);
+
+        int def_font_size = 18;
+        int label_max_width = 250;
+
+        Text text = new Text(data[turn+1]);
+        text.setFont(new Font("arial", def_font_size));
+
+        while(text.prefWidth(250) > label_max_width)
+        {
+            def_font_size--;
+            text.setFont(new Font("arial", def_font_size));
+            dataLabels[turn].setStyle("-fx-font: "+def_font_size+" arial;");
+            dataLabels[turn].setTranslateY(1.25*(18 - def_font_size));
+        }
+
         turn++;
     }
 
@@ -663,23 +680,24 @@ public class StarWarsCharacterGuessingGame extends Application
     private static int getRandomInt(int max)
     {
         Random r = new Random();
-        return r.nextInt(max - 1) + 1;
+        return 6;
+        //return r.nextInt(max - 1) + 1;
     }
 
     // TEMP
     private String getDataLabel(int a)
     {
         return switch (a)
-                {
-                    case 0 -> "Name";
-                    case 1 -> "Species";
-                    case 2 -> "Gender/Droid Type";
-                    case 3 -> "Birth Year";
-                    case 4 -> "Homeworld";
-                    case 5 -> "First Screen Appearance";
-                    case 6 -> "Wiki Link";
-                    case 7 -> "Image Link";
-                    default -> null;
-                };
+        {
+            case 0 -> "Name";
+            case 1 -> "Species";
+            case 2 -> "Gender/Droid Type";
+            case 3 -> "Birth Year";
+            case 4 -> "Homeworld";
+            case 5 -> "First Screen Appearance";
+            case 6 -> "Wiki Link";
+            case 7 -> "Image Link";
+            default -> null;
+        };
     }
 }
