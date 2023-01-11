@@ -1,4 +1,3 @@
-// TEMP
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
@@ -6,7 +5,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -19,7 +17,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -51,35 +48,41 @@ import java.util.*;
     - Import to website
  */
 
+/* TEMP
+
+
+ */
 public class StarWarsCharacterGuessingGame extends Application
 {
-    // TEMP
-    private int turn = 0;
-    private Label[] dataLabels;
+    private static String[] possibleCharacters = null, formattedCharacterNames = null;
     private static String[] data;
-    private TextField field;
-    private Rectangle[] guessFrames;
-    private Button submit;
-    private List<Label> guesses;
-    private TextFlow endText;
-    private Rectangle frame;
-    private ImageView imageView;
+    private int turn = 0;
+
     private Label imageLabel, characterName, invalidGuess = null;
+    private Rectangle[] guessFrames;
+    private ImageView imageView;
+    private List<Label> guesses;
+    private Label[] dataLabels;
+    private TextFlow endText;
+    private TextField field;
+    private Rectangle frame;
+    private Button submit;
+
     private Pane layout;
     private Stage stage;
-    private static String[] possibleCharacters = null, formattedCharacterNames = null;
 
-    // TEMP
+    // Choose a random character and launch the application
     public static void main(String[] args) throws IOException
     {
         data = getRandomCharacter();
         launch(args);
     }
 
-    // TEMP
+    // Set the game's frame and sub views
     @Override
     public void start(Stage stage) throws Exception
     {
+        // Set the main scene
         this.stage = stage;
         stage.setTitle("Star Wars Character Guessing Game");
 
@@ -94,10 +97,11 @@ public class StarWarsCharacterGuessingGame extends Application
         stage.setScene(scene);
         stage.show();
 
+        // Set the subviews
         setView();
     }
 
-    // TEMP
+    // Set up all the application's subviews
     private void setView() throws FileNotFoundException
     {
         setTitle();
@@ -108,18 +112,21 @@ public class StarWarsCharacterGuessingGame extends Application
         setGuessField();
         setSubmitButton();
 
+        // Display the first set of information
         updateCharacterInformation();
     }
 
-    // TEMP
+    // Set up the title and logo
     private void setTitle() throws FileNotFoundException
     {
+        // Star Wars logo
         ImageView logo = new ImageView(new Image(new FileInputStream("data/star_wars.png")));
         logo.setFitWidth(120);
         logo.setFitHeight(57.2);
         logo.setX(20);
         logo.setY(5);
 
+        // Character Guessing Game title
         Label title = new Label("Character Guessing Game");
         title.setStyle("-fx-font: 28 arial; -fx-font-weight: bold;");
         title.setLayoutX(150);
@@ -130,21 +137,24 @@ public class StarWarsCharacterGuessingGame extends Application
         layout.getChildren().addAll(logo, title);
     }
 
-    // TEMP
+    // Set up the information button
     private void setInformationIcon() throws FileNotFoundException
     {
+        // Set the logo
         ImageView info = new ImageView(new Image(new FileInputStream("data/info.png")));
         info.setFitWidth(35);
         info.setFitHeight(35);
         info.setX(840);
         info.setY(17.5);
 
+        // Create a hoverable frame around the logo
         Label hover = new Label();
         hover.setPrefWidth(35);
         hover.setPrefHeight(35);
         hover.setLayoutX(840);
         hover.setLayoutY(17.5);
 
+        // Create a new stage and panel for the information panel
         Stage infoStage = new Stage();
         infoStage.initOwner(stage);
         infoStage.initStyle(StageStyle.UNDECORATED);
@@ -156,6 +166,7 @@ public class StarWarsCharacterGuessingGame extends Application
 
         setInformationPane(infoPane);
 
+        // Mouse hover event handler
         hover.setOnMouseEntered(new EventHandler<MouseEvent>()
         {
             @Override
@@ -167,6 +178,7 @@ public class StarWarsCharacterGuessingGame extends Application
             }
         });
 
+        // Mouse hover exit event handler
         hover.setOnMouseExited(new EventHandler<MouseEvent>()
         {
             @Override
@@ -179,14 +191,16 @@ public class StarWarsCharacterGuessingGame extends Application
         layout.getChildren().addAll(info, hover);
     }
 
-    // TEMP
+    // Set up the information panel
     private void setInformationPane(Pane layout)
     {
+        // Add a border
         Rectangle border = new Rectangle(0, 0, 500, 620);
         border.setFill(Color.TRANSPARENT);
         border.setStroke(Color.BLACK);
         border.setStrokeWidth(1);
 
+        // Create the information text
         String infoString =
                 "Instructions and Information:" +
                         "\n\n" +
@@ -209,14 +223,16 @@ public class StarWarsCharacterGuessingGame extends Application
         layout.getChildren().addAll(border, infoLabel);
     }
 
-    // TEMP
+    // Set the character image frame
     private void setImageFrame()
     {
+        // Create the frame
         frame = new Rectangle(50, 80, 250, 250);
         frame.setFill(Color.TRANSPARENT);
         frame.setStroke(Color.BLACK);
         frame.setStrokeWidth(2);
 
+        // Create the question mark
         Label qMark = new Label("?");
         qMark.setStyle("-fx-font: 225 arial;");
         qMark.setLayoutX(frame.getX() + 60);
@@ -226,9 +242,10 @@ public class StarWarsCharacterGuessingGame extends Application
         layout.getChildren().add(qMark);
     }
 
-    //TEMP
+    // Set the character's information labels
     private void setInformationLabels()
     {
+        // Set up the character's name label
         characterName = new Label("???");
         characterName.setStyle("-fx-font: 28 arial; -fx-font-weight: bold;");
         characterName.setAlignment(Pos.CENTER);
@@ -240,13 +257,16 @@ public class StarWarsCharacterGuessingGame extends Application
 
         dataLabels = new Label[5];
 
+        // Set up all the additional information labels
         for(int i = 0; i < 5; i++)
         {
+            // Create the label
             Label label = new Label(getDataLabel(i+1));
             label.setStyle("-fx-font: 20 arial; -fx-font-weight: bold;");
             label.setLayoutY(140 + (i*40));
             label.setLayoutX(325);
 
+            // Create the data label
             Label information = new Label("???");
             information.setStyle("-fx-font: 18 arial;");
             information.setPrefHeight(label.getHeight());
@@ -260,11 +280,12 @@ public class StarWarsCharacterGuessingGame extends Application
         }
     }
 
-    // TEMP
+    // Set up the guess frames
     private void setGuessFrames()
     {
         guessFrames = new Rectangle[5];
 
+        // Five frames for five guesses
         for(int i=0; i<5; i++)
         {
             Rectangle frame = new Rectangle(50, 0, 800, 50);
@@ -278,7 +299,7 @@ public class StarWarsCharacterGuessingGame extends Application
         }
     }
 
-    // TEMP
+    // Set the editable guess field
     private void setGuessField()
     {
         field = new TextField();
