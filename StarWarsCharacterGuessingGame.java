@@ -190,7 +190,7 @@ public class StarWarsCharacterGuessingGame extends Application
         String infoString =
                 "Instructions and Information:" +
                         "\n\n" +
-                        "Welcome to the Star Wars Character Guessing Game! Inspired by Wordle and its many spinoffs, the goal of the game is to guess the randomly chosen Star Wars character in the lowest amount of guesses possible! The current game has a total of 14 characters.\n" +
+                        "Welcome to the Star Wars Character Guessing Game! Inspired by Wordle and its many spinoffs, the goal of the game is to guess the randomly chosen Star Wars character in the lowest amount of guesses possible! The current game has a total of 17 characters.\n" +
                         "\n" +
                         "At first, all you are given is the character's species, but with every incorrect answer, more information is given. Gender for biological characters or Droid Type for droids (ex: astromech, protocol), Birth Year given in BBY and ABY for Before and After the Battle of Yavin, which takes place during Episode IV: A New Hope (droid birth years are the years they were created and are usually approximations), Homeworld (wherever the character grew up, not necessarily where they were born, for a droid it would not necessarily be where they were built, but where they first worked) and finally their First on Screen Apperance.\n" +
                         "\n" +
@@ -676,7 +676,8 @@ public class StarWarsCharacterGuessingGame extends Application
     private static int getRandomInt(int max)
     {
         Random r = new Random();
-        return r.nextInt(max - 1) + 1;
+        return 15;
+        //return r.nextInt(max - 1) + 1;
     }
 
     // TEMP
