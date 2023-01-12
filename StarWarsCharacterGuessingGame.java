@@ -310,6 +310,7 @@ public class StarWarsCharacterGuessingGame extends Application
         field.setStyle("-fx-font-size: 20px;");
         field.setPromptText("Guess Character");
 
+        // Add auto complete with list of possible characters
         layout.getStylesheets().add("new_style.css");
         AutoCompletionBinding<String> binding = TextFields.bindAutoCompletion(field, formattedCharacterNames);
         binding.setPrefWidth(field.getPrefWidth()/3);
@@ -317,7 +318,7 @@ public class StarWarsCharacterGuessingGame extends Application
         layout.getChildren().add(field);
     }
 
-    // TEMP
+    // Set up the submit guess button
     private void setSubmitButton()
     {
         submit = new Button("SUBMIT");
@@ -331,11 +332,13 @@ public class StarWarsCharacterGuessingGame extends Application
 
         guesses = new ArrayList<>();
 
+        // Click event
         submit.setOnAction(new EventHandler<ActionEvent>()
         {
             @Override
             public void handle(ActionEvent actionEvent)
             {
+                // Button either submits a guess or starts a new game
                 if(submit.getText().equals("SUBMIT"))
                 {
                     MakeGuess();
@@ -347,6 +350,7 @@ public class StarWarsCharacterGuessingGame extends Application
             }
         });
 
+        // A guess can also be submitted when the enter key is hit on the guess field
         field.setOnKeyPressed(new EventHandler<KeyEvent>()
         {
             @Override
@@ -359,6 +363,7 @@ public class StarWarsCharacterGuessingGame extends Application
             }
         });
 
+        // Check if the field contains text, if not then disable the submit button
         field.textProperty().addListener((observable, oldValue, newValue) ->
         {
             if(field.getText().replaceAll("\\s+","").equals("") && !submit.getText().equals("PLAY AGAIN"))
@@ -374,38 +379,49 @@ public class StarWarsCharacterGuessingGame extends Application
         layout.getChildren().add(submit);
     }
 
-    // TEMP
+    // Submit a guess to the game
     private void MakeGuess()
     {
+        // Get the guessed character
         String guess = field.getText().toLowerCase();
 
+        // Remove the invalid guess message
         if(invalidGuess != null && layout.getChildren().contains(invalidGuess))
         {
             layout.getChildren().remove(invalidGuess);
         }
 
+        // If the guess is valid, continue
         if(Arrays.asList(possibleCharacters).contains(guess))
         {
+            // If the guess is correct
             if(guess.equals(data[0].toLowerCase()))
             {
+                // Update the current guess frame
                 setGuessFrame(turn - 1, true);
                 endGame(true);
 
+                // Show all data
                 while(turn < 5)
                 {
                     updateCharacterInformation();
                 }
 
+                // Show success animation
                 showSuccess();
             }
+            // If the guess isn't correct
             else
             {
+                // Update the current guess frame
                 setGuessFrame(turn - 1, false);
 
+                // Give the player more information
                 if(turn < 5)
                 {
                     updateCharacterInformation();
                 }
+                // Finish the game if the player ran out o turns
                 else
                 {
                     endGame(false);
@@ -413,8 +429,10 @@ public class StarWarsCharacterGuessingGame extends Application
 
             }
         }
+        // If the guess is invalid
         else
         {
+            // Display an error message
             invalidGuess = new Label("That character doesn't exist in this game!");
             invalidGuess.setStyle("-fx-font: 18 arial;");
             invalidGuess.setAlignment(Pos.CENTER);
@@ -429,13 +447,14 @@ public class StarWarsCharacterGuessingGame extends Application
         field.setText("");
     }
 
-    // TEMP
+    // When the character has correctly guessed the character, show animation
     private void showSuccess()
     {
+        // Get the confetti gif
         String path = "data/confetti.gif";
-
         Image image = new Image((new File(path).toURI().toString()));
 
+        // Create images for either sides of the frame
         ImageView leftConfetti = new ImageView(image);
         leftConfetti.setX(-100);
 
@@ -444,6 +463,7 @@ public class StarWarsCharacterGuessingGame extends Application
 
         layout.getChildren().addAll(leftConfetti, rightConfetti);
 
+        // Animate the gif so that it plays once and fades out of view
         FadeTransition ft = new FadeTransition(Duration.millis(1000), leftConfetti);
         ft.setFromValue(1.0);
         ft.setToValue(0.0);
@@ -455,6 +475,7 @@ public class StarWarsCharacterGuessingGame extends Application
         ft.play();
         ft2.play();
 
+        // When the animation ends, remove the left confetti
         ft.statusProperty().addListener(new ChangeListener<Animation.Status>()
         {
             @Override
@@ -463,28 +484,18 @@ public class StarWarsCharacterGuessingGame extends Application
                 if(newValue == Animation.Status.STOPPED)
                 {
                     layout.getChildren().remove(leftConfetti);
-                }
-            }
-        });
-
-        ft2.statusProperty().addListener(new ChangeListener<Animation.Status>()
-        {
-            @Override
-            public void changed(ObservableValue<? extends Animation.Status> observableValue, Animation.Status oldValue, Animation.Status newValue)
-            {
-                if(newValue == Animation.Status.STOPPED)
-                {
                     layout.getChildren().remove(rightConfetti);
                 }
             }
         });
     }
 
-    // TEMP
+    // Set the current guess frame with the guessed character and corresponding background colour
     private void setGuessFrame(int frame, boolean correct)
     {
         Rectangle current = guessFrames[frame];
 
+        // Display the guess
         Label guess = new Label(field.getText());
         guess.setLayoutX(current.getX() + 15);
         guess.setLayoutY(current.getY());
@@ -493,6 +504,7 @@ public class StarWarsCharacterGuessingGame extends Application
         guess.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
         guess.setTextFill(Color.WHITE);
 
+        // Display the status as a checkmark of cross
         Label status = new Label(correct ? "✓" : "✗");
         status.setLayoutX(805);
         status.setLayoutY(current.getY());
@@ -504,6 +516,7 @@ public class StarWarsCharacterGuessingGame extends Application
         guesses.add(status);
         layout.getChildren().addAll(guess, status);
 
+        // Display green for correct and red for incorrect
         if(correct)
         {
             current.setFill(Color.GREEN);
@@ -514,11 +527,12 @@ public class StarWarsCharacterGuessingGame extends Application
         }
     }
 
-    // TEMP
+    // Set the character's image when the game has ended
     private void setCharacterImage()
     {
         Image image = null;
 
+        // Load the image from the database
         try
         {
             image = new Image(data[7].replaceAll("\"", ""));
@@ -526,6 +540,7 @@ public class StarWarsCharacterGuessingGame extends Application
         }
         catch (Exception e)
         {
+            // If the image can't be loaded, show a default and the character's name
             try
             {
                 image = new Image(new FileInputStream("data/blank_pfp.png"));
@@ -541,6 +556,7 @@ public class StarWarsCharacterGuessingGame extends Application
             imageLabel.setPrefHeight(frame.getHeight());
         }
 
+        // Create the image view
         imageView = new ImageView(image);
         imageView.setFitWidth(frame.getWidth());
         imageView.setFitHeight(frame.getHeight());
@@ -697,8 +713,7 @@ public class StarWarsCharacterGuessingGame extends Application
     private static int getRandomInt(int max)
     {
         Random r = new Random();
-        return 15;
-        //return r.nextInt(max - 1) + 1;
+        return r.nextInt(max - 1) + 1;
     }
 
     // TEMP
