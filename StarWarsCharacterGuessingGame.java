@@ -572,9 +572,10 @@ public class StarWarsCharacterGuessingGame extends Application
         }
     }
 
-    // TEMP
+    // Finish the game
     private void endGame(boolean success)
     {
+        // change the submit button and guess field
         characterName.setText(data[0]);
         submit.setText("PLAY AGAIN");
         field.setText("");
@@ -589,6 +590,7 @@ public class StarWarsCharacterGuessingGame extends Application
 
         Text status = new Text(success ? "Congratulations" : "Unlucky");
 
+        // Label with the character's wiki page embedded
         endText = new TextFlow(
                 status,
                 new Text("! Check out " + data[0] + "'s wiki page "),
@@ -603,32 +605,39 @@ public class StarWarsCharacterGuessingGame extends Application
         endText.setLayoutX(50);
 
         layout.getChildren().add(endText);
+
+        // Set the character's image
         setCharacterImage();
     }
 
-    // TEMP
+    // Reset the game
     private void resetGame()
     {
+        // Reset the submit button and character name
         submit.setText("SUBMIT");
         characterName.setText("???");
 
         layout.getChildren().removeAll(endText, imageView, imageLabel);
 
+        // Reset all the guess frames to white
         for(Rectangle r : guessFrames)
         {
             r.setFill(Color.WHITE);
         }
 
+        // Remove all the character guesses
         for(Label l : guesses)
         {
             layout.getChildren().remove(l);
         }
 
+        // Reset all the character's information
         for(Label l : dataLabels)
         {
             l.setText("???");
         }
 
+        // Reset the turn and choose a new character
         try
         {
             turn = 0;
@@ -641,9 +650,10 @@ public class StarWarsCharacterGuessingGame extends Application
         }
     }
 
-    // TEMP
+    // Provide the player with the next set of character information
     private void updateCharacterInformation()
     {
+        // Display the next information
         dataLabels[turn].setText(data[turn+1]);
 
         int def_font_size = 18;
@@ -652,6 +662,7 @@ public class StarWarsCharacterGuessingGame extends Application
         Text text = new Text(data[turn+1]);
         text.setFont(new Font("arial", def_font_size));
 
+        // Resize the label's font to fit the information
         while(text.prefWidth(250) > label_max_width)
         {
             def_font_size--;
@@ -663,15 +674,18 @@ public class StarWarsCharacterGuessingGame extends Application
         turn++;
     }
 
-    // TEMP
+    // Select a random character from the database
     private static String[] getRandomCharacter() throws IOException
     {
+        // Load the database
         String path = "data/sw_character_data.csv";
         BufferedReader br = new BufferedReader(new FileReader(path));
 
+        // Get a random character index
         int num = getRandomInt((int)new BufferedReader(new FileReader(path)).lines().count());
         boolean setList = possibleCharacters == null;
 
+        // If the lists haven't been set, initialize them
         if(setList)
         {
             possibleCharacters = new String[(int)new BufferedReader(new FileReader(path)).lines().count() - 1];
@@ -682,17 +696,20 @@ public class StarWarsCharacterGuessingGame extends Application
         int index = 0;
         String line = "";
 
+        // Continuously read database lines
         while((line = br.readLine()) != null)
         {
+            // Get the information as a string array
             String[] curr =  line.split(",");
 
+            // Don't add the labels to the characters list
             if(index != 0)
             {
                 possibleCharacters[index - 1] = curr[0].toLowerCase();
                 formattedCharacterNames[index - 1] = curr[0];
             }
 
-
+            // If the random index is reached, set the character information
             if(index == num)
             {
                 character = curr;
@@ -709,14 +726,14 @@ public class StarWarsCharacterGuessingGame extends Application
         return character;
     }
 
-    // TEMP
+    // Get a random integer from 0 to the specified max
     private static int getRandomInt(int max)
     {
         Random r = new Random();
         return r.nextInt(max - 1) + 1;
     }
 
-    // TEMP
+    // Get the label corresponding with the position
     private String getDataLabel(int a)
     {
         return switch (a)
