@@ -1,10 +1,6 @@
 import javafx.animation.Animation;
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -15,8 +11,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -48,8 +42,12 @@ import java.util.*;
     - Import to website
  */
 
-/* TEMP
+/* StarWarsCharacterGuessingGame.java
 
+    Main class for the guessing game, that handles everything from selecting a random character, to displaying
+    animations. ALl functions will have proper comments to describe what is done inside each one.
+
+    Created by Aiden Carelse (Jan 2023)
 
  */
 public class StarWarsCharacterGuessingGame extends Application
@@ -147,7 +145,7 @@ public class StarWarsCharacterGuessingGame extends Application
         info.setX(840);
         info.setY(17.5);
 
-        // Create a hoverable frame around the logo
+        // Create a frame around the logo that handles the hover action
         Label hover = new Label();
         hover.setPrefWidth(35);
         hover.setPrefHeight(35);
@@ -167,26 +165,15 @@ public class StarWarsCharacterGuessingGame extends Application
         setInformationPane(infoPane);
 
         // Mouse hover event handler
-        hover.setOnMouseEntered(new EventHandler<MouseEvent>()
+        hover.setOnMouseEntered(t ->
         {
-            @Override
-            public void handle(MouseEvent t)
-            {
-                infoStage.setX(stage.getX() + 350);
-                infoStage.setY(stage.getY() + 80);
-                infoStage.show();
-            }
+            infoStage.setX(stage.getX() + 350);
+            infoStage.setY(stage.getY() + 80);
+            infoStage.show();
         });
 
         // Mouse hover exit event handler
-        hover.setOnMouseExited(new EventHandler<MouseEvent>()
-        {
-            @Override
-            public void handle(MouseEvent t)
-            {
-                infoStage.hide();
-            }
-        });
+        hover.setOnMouseExited(t -> infoStage.hide());
 
         layout.getChildren().addAll(info, hover);
     }
@@ -202,15 +189,17 @@ public class StarWarsCharacterGuessingGame extends Application
 
         // Create the information text
         String infoString =
-                "Instructions and Information:" +
-                        "\n\n" +
-                        "Welcome to the Star Wars Character Guessing Game! Inspired by Wordle and its many spinoffs, the goal of the game is to guess the randomly chosen Star Wars character in the lowest amount of guesses possible! The current game has a total of 17 characters.\n" +
-                        "\n" +
-                        "At first, all you are given is the character's species, but with every incorrect answer, more information is given. Gender for biological characters or Droid Type for droids (ex: astromech, protocol), Birth Year given in BBY and ABY for Before and After the Battle of Yavin, which takes place during Episode IV: A New Hope (droid birth years are the years they were created and are usually approximations), Homeworld (wherever the character grew up, not necessarily where they were born, for a droid it would not necessarily be where they were built, but where they first worked) and finally their First on Screen Apperance.\n" +
-                        "\n" +
-                        "Once you have succesfully guessed the chosen character, or you have run out of guesses, all the information as well as the character's name will be given along with an image and link to their wiki page. You can then press the 'PLAY AGAIN' button to restart the game with another randomly chosen character. Overall, it's pretty simple!\n" +
-                        "\n\n" +
-                        "Created by Aiden Carelse (January 2023)";
+                """
+                        Instructions and Information:
+
+                        Welcome to the Star Wars Character Guessing Game! Inspired by Wordle and its many spin-offs, the goal of the game is to guess the randomly chosen Star Wars character in the lowest amount of guesses possible! The current game has a total of 17 characters.
+
+                        At first, all you are given is the character's species, but with every incorrect answer, more information is given. Gender for biological characters or Droid Type for droids (ex: astromech, protocol), Birth Year given in BBY and ABY for Before and After the Battle of Yavin, which takes place during Episode IV: A New Hope (droid birth years are the years they were created and are usually approximations), Homeworld (wherever the character grew up, not necessarily where they were born, for a droid it would not necessarily be where they were built, but where they first worked) and finally their First on Screen Appearance.
+
+                        Once you have successfully guessed the chosen character, or you have run out of guesses, all the information as well as the character's name will be given along with an image and link to their wiki page. You can then press the 'PLAY AGAIN' button to restart the game with another randomly chosen character. Overall, it's pretty simple!
+
+
+                        Created by Aiden Carelse (January 2023)""";
 
         Label infoLabel = new Label(infoString);
         infoLabel.setStyle("-fx-font: 16 arial;");
@@ -333,48 +322,30 @@ public class StarWarsCharacterGuessingGame extends Application
         guesses = new ArrayList<>();
 
         // Click event
-        submit.setOnAction(new EventHandler<ActionEvent>()
+        submit.setOnAction(actionEvent ->
         {
-            @Override
-            public void handle(ActionEvent actionEvent)
+            // Button either submits a guess or starts a new game
+            if(submit.getText().equals("SUBMIT"))
             {
-                // Button either submits a guess or starts a new game
-                if(submit.getText().equals("SUBMIT"))
-                {
-                    MakeGuess();
-                }
-                else
-                {
-                    resetGame();
-                }
+                MakeGuess();
+            }
+            else
+            {
+                resetGame();
             }
         });
 
         // A guess can also be submitted when the enter key is hit on the guess field
-        field.setOnKeyPressed(new EventHandler<KeyEvent>()
+        field.setOnKeyPressed(ke ->
         {
-            @Override
-            public void handle(KeyEvent ke)
+            if (ke.getCode().equals(KeyCode.ENTER))
             {
-                if (ke.getCode().equals(KeyCode.ENTER))
-                {
-                    MakeGuess();
-                }
+                MakeGuess();
             }
         });
 
         // Check if the field contains text, if not then disable the submit button
-        field.textProperty().addListener((observable, oldValue, newValue) ->
-        {
-            if(field.getText().replaceAll("\\s+","").equals("") && !submit.getText().equals("PLAY AGAIN"))
-            {
-                submit.setDisable(true);
-            }
-            else
-            {
-                submit.setDisable(false);
-            }
-        });
+        field.textProperty().addListener((observable, oldValue, newValue) -> submit.setDisable(field.getText().replaceAll("\\s+", "").equals("") && !submit.getText().equals("PLAY AGAIN")));
 
         layout.getChildren().add(submit);
     }
@@ -386,7 +357,7 @@ public class StarWarsCharacterGuessingGame extends Application
         String guess = field.getText().toLowerCase();
 
         // Remove the invalid guess message
-        if(invalidGuess != null && layout.getChildren().contains(invalidGuess))
+        if(invalidGuess != null)
         {
             layout.getChildren().remove(invalidGuess);
         }
@@ -476,16 +447,12 @@ public class StarWarsCharacterGuessingGame extends Application
         ft2.play();
 
         // When the animation ends, remove the left confetti
-        ft.statusProperty().addListener(new ChangeListener<Animation.Status>()
+        ft.statusProperty().addListener((observableValue, oldValue, newValue) ->
         {
-            @Override
-            public void changed(ObservableValue<? extends Animation.Status> observableValue, Animation.Status oldValue, Animation.Status newValue)
+            if(newValue == Animation.Status.STOPPED)
             {
-                if(newValue == Animation.Status.STOPPED)
-                {
-                    layout.getChildren().remove(leftConfetti);
-                    layout.getChildren().remove(rightConfetti);
-                }
+                layout.getChildren().remove(leftConfetti);
+                layout.getChildren().remove(rightConfetti);
             }
         });
     }
@@ -583,10 +550,7 @@ public class StarWarsCharacterGuessingGame extends Application
         Hyperlink wikiLink = new Hyperlink("here");
         wikiLink.setPadding(new Insets(0));
 
-        wikiLink.setOnAction(event ->
-        {
-            getHostServices().showDocument(data[6]);
-        });
+        wikiLink.setOnAction(event -> getHostServices().showDocument(data[6]));
 
         Text status = new Text(success ? "Congratulations" : "Unlucky");
 
@@ -694,7 +658,7 @@ public class StarWarsCharacterGuessingGame extends Application
 
         String[] character = null;
         int index = 0;
-        String line = "";
+        String line;
 
         // Continuously read database lines
         while((line = br.readLine()) != null)
